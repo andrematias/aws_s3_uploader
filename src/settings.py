@@ -1,7 +1,26 @@
+"""
+True para verificar após o upload se existe o arquivo no bucket
+"""
 DOUBLE_CHECK_UPLOAD = False
+
+"""
+Define a raiz do storage de gravações
+"""
 STORAGE_ROOT = "../storage/"
+
+"""
+Define as extensões para upload
+"""
 FILES_PATERNS = "*.txt,*.mp3,*.wav"
+
+"""
+Define o nome do bucket s3
+"""
 S3_BUCKET = "gravacoesmutant-prd"
+
+"""
+Configura o logger
+"""
 INFO_LOGGER_FILE = "../logs/info.log"
 ERROR_LOGGER_FILE = "../logs/error.log"
 LOGGING_CONFIG = {
