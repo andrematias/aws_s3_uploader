@@ -1,3 +1,6 @@
+DOUBLE_CHECK_UPLOAD = False
+STORAGE_ROOT = "../storage/"
+FILES_PATERNS = "*.txt,*.mp3,*.wav"
 S3_BUCKET = "gravacoesmutant-prd"
 INFO_LOGGER_FILE = "../logs/info.log"
 ERROR_LOGGER_FILE = "../logs/error.log"
