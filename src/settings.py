@@ -14,6 +14,11 @@ Define as extensões para upload
 FILES_PATERNS = "*.txt,*.mp3,*.wav"
 
 """
+Define o tamanho maximo do arquivo, caso maiores serão desconsiderados
+"""
+MAX_FILE_SIZE = 1024 * 100
+
+"""
 Define o nome do bucket s3
 """
 S3_BUCKET = "gravacoesmutant-prd"

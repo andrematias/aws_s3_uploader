@@ -26,13 +26,15 @@ def main():
             bucket_path = os.sep.join(bucket_path[2:])
             object_name = os.path.join(bucket_path, file.name)
 
-            s3.upload_file(file, settings.S3_BUCKET, object_name)
-            if settings.DOUBLE_CHECK_UPLOAD and s3.check_file(object_name):
-                logger.info(
-                    "Arquivo '%s' confirmado no bucket '%s'",
-                    object_name,
-                    settings.S3_BUCKET,
-                )
+            file_stats = file.stat()
+            if file_stats.st_size <= settings.MAX_FILE_SIZE:
+                s3.upload_file(file, settings.S3_BUCKET, object_name)
+                if settings.DOUBLE_CHECK_UPLOAD and s3.check_file(object_name):
+                    logger.info(
+                        "Arquivo '%s' confirmado no bucket '%s'",
+                        object_name,
+                        settings.S3_BUCKET,
+                    )
     except ClientError as e:
         logger.error(e)
 
