@@ -39,23 +39,41 @@ class ProgressPercentage:
             sys.stdout.flush()
 
 
-def upload_file(file_name, bucket, object_name=None):
-    """Upload a file to an S3 bucket
-
-    :param file_name: File to upload
-    :param bucket: Bucket to upload to
-    :param object_name: S3 object name. If not specified then file_name is used
-    :return: True if file was uploaded, else False
+class S3:
     """
-    if object_name is None:
-        object_name = os.path.basename(file_name)
+    Realiza os processos de upload e relacionados ao AWS s3
+    """
 
-    s3_client = boto3.client("s3")
-    try:
-        s3_client.upload_file(
-            file_name, bucket, object_name, Callback=ProgressPercentage(file_name)
+    def __init__(self):
+        self.__client = boto3.client("s3")
+
+    def upload_file(self, file_name, bucket, object_name=None):
+        """Upload a file to an S3 bucket
+
+        :param file_name: File to upload
+        :param bucket: Bucket to upload to
+        :param object_name: S3 object name. If not specified then file_name is used
+        :return: True if file was uploaded, else False
+        """
+        if object_name is None:
+            object_name = os.path.basename(file_name)
+
+        try:
+            self.__client.upload_file(
+                file_name, bucket, object_name, Callback=ProgressPercentage(file_name)
+            )
+
+        except ClientError as e:
+            logger.error(e)
+            return False
+        return True
+
+    def check_file(self, object_name):
+        """
+        Verifica se existe um arquivo com o nome informado no s3
+        :param object_name Nome do arquivo salvo no bucket
+        """
+        response = self.__client.list_objects(
+            Bucket=settings.S3_BUCKET, MaxKeys=1, Prefix=object_name
         )
-    except ClientError as e:
-        logger.error(e)
-        return False
-    return True
+        return response.get("Contents") is not None
