@@ -47,7 +47,7 @@ class S3:
     def __init__(self):
         self.__client = boto3.client("s3")
 
-    def upload_file(self, file_name, bucket, object_name=None):
+    def upload_file(self, file_name, bucket, object_name=None, force=False):
         """Upload a file to an S3 bucket
 
         :param file_name: File to upload
@@ -59,14 +59,20 @@ class S3:
             object_name = os.path.basename(file_name)
 
         try:
-            self.__client.upload_file(
-                file_name, bucket, object_name, Callback=ProgressPercentage(file_name)
-            )
+            if not self.check_file(object_name) or force:
+                self.__client.upload_file(
+                    file_name,
+                    bucket,
+                    object_name,
+                    Callback=ProgressPercentage(file_name),
+                )
+                return True
 
         except ClientError as e:
             logger.error(e)
             return False
-        return True
+        logger.info("Arquivo '%s' já exite no bucket", object_name)
+        return False
 
     def check_file(self, object_name):
         """

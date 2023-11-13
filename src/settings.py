@@ -19,6 +19,11 @@ Define o tamanho maximo do arquivo, caso maiores serão desconsiderados
 MAX_FILE_SIZE = 1024 * 100
 
 """
+Define se o upload acontece mesmo se já existir o arquivo
+"""
+FORCE_UPLOAD = False
+
+"""
 Define o nome do bucket s3
 """
 S3_BUCKET = "gravacoesmutant-prd"
