@@ -38,6 +38,7 @@ def main():
                         object_name,
                         settings.S3_BUCKET,
                     )
+                storage.remove_file(file)
     except ClientError as e:
         logger.error(e)
 

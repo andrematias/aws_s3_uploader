@@ -1,6 +1,5 @@
 import logging
 import logging.config
-import os
 import shutil
 from pathlib import Path
 
@@ -60,11 +59,12 @@ def purge_empty_dir(root):
         pass
 
 
-def remove_file(filename):
+def remove_file(filepath):
     """
     Remove o arquivo informado
     :param filename Caminho para o arquivo
     """
-    p = Path(filename)
+    p = Path(filepath)
     if p.resolve():
+        logger.info("Apagando o arquivo local: %s", filepath)
         p.unlink()
