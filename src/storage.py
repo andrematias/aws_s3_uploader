@@ -1,6 +1,8 @@
 import logging
 import logging.config
+import os
 import shutil
+from contextlib import suppress
 from pathlib import Path
 
 import settings
@@ -51,12 +53,9 @@ def purge_empty_dir(root):
     :param root Um diretório raiz
     """
     logger.info("Apagando diretórios vazios na raiz: %s", root)
-    paths = Path(root).rglob("*")
-    try:
-        for path in paths:
-            path.rmdir()
-    except OSError:
-        pass
+    for directory, _, _ in os.walk(root):
+        with suppress(OSError):
+            os.removedirs(directory)
 
 
 def remove_file(filepath):

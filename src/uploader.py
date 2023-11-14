@@ -47,6 +47,7 @@ def main():
                         settings.S3_BUCKET,
                     )
                 storage.remove_file(file)
+                storage.purge_empty_dir(file.parent)
     except ClientError as e:
         logger.error(e)
 
