@@ -71,7 +71,7 @@ class S3:
         except ClientError as e:
             logger.error(e)
             return False
-        logger.info("Arquivo '%s' já exite no bucket", object_name)
+        logger.info("Arquivo '%s' já existe no bucket", object_name)
         return False
 
     def check_file(self, object_name):
