@@ -29,6 +29,11 @@ Define o nome do bucket s3
 S3_BUCKET = "gravacoesmutant-prd"
 
 """
+Define o tamanho do lote que será incluso na fila de upload
+"""
+MAX_QUEUE_SIZE = 100
+
+"""
 Configura o logger
 """
 INFO_LOGGER_FILE = "../logs/info.log"
