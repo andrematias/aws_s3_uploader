@@ -1,13 +1,21 @@
+import logging
+import logging.config
 import multiprocessing
 import os
 import os.path
 import sys
+import traceback
 
 import servicemanager
 import win32service
 import win32serviceutil
 
 from uploader import watch
+import settings
+
+logging.config.dictConfig(settings.LOGGING_CONFIG)
+logger = logging.getLogger("extensive")
+
 
 
 class ProcessService(win32serviceutil.ServiceFramework):
@@ -60,8 +68,6 @@ if __name__ == "__main__":
     try:
         start()
     except (SystemExit, KeyboardInterrupt):
-        raise
+        logger.info("Parando o serviço")
     except:
-        import traceback
-
         traceback.print_exc()
