@@ -1,4 +1,9 @@
 """
+Define o tempo em que um novo processo de upload se inicia
+"""
+WATCH_SECONDS = 60 * 60  # 1h
+
+"""
 Define o horario de inicio e fim que o script pode ser executado
 """
 START_TIME = "23:50:00"

@@ -7,10 +7,14 @@ import servicemanager
 import win32service
 import win32serviceutil
 
-from uploader import runner
+from uploader import watch
 
 
 class ProcessService(win32serviceutil.ServiceFramework):
+    """
+    Cria um serviço no Windows
+    """
+
     _svc_name_ = "S3Uploader"
     _svc_display_name_ = "AWS S3 Uploader"
     _svc_description_ = (
@@ -27,25 +31,27 @@ class ProcessService(win32serviceutil.ServiceFramework):
             self.proc.terminate()
 
     def SvcRun(self):
-        self.proc = multiprocessing.Process(target=runner)
+        self.proc = multiprocessing.Process(target=watch)
         self.proc.start()
         self.ReportServiceStatus(win32service.SERVICE_RUNNING)
         self.SvcDoRun()
         self.ReportServiceStatus(win32service.SERVICE_STOP_PENDING)
 
     def SvcDoRun(self):
-        self.proc.join()
+        if self.proc:
+            self.proc.join()
 
 
 def start():
+    """
+    Inicia o serviço em foreground, instala, remove, start, stop
+    """
     if len(sys.argv) == 1:
-        import win32traceutil
-
         servicemanager.Initialize()
         servicemanager.PrepareToHostSingle(ProcessService)
         servicemanager.StartServiceCtrlDispatcher()
     elif "--fg" in sys.argv:
-        runner()
+        watch()
     else:
         win32serviceutil.HandleCommandLine(ProcessService)
 

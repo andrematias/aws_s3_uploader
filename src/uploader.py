@@ -3,6 +3,7 @@ import itertools
 import logging
 import logging.config
 import os
+import time
 
 from botocore.exceptions import ClientError
 
@@ -79,7 +80,18 @@ def runner():
     """
     if in_work_time(settings.START_TIME, settings.END_TIME):
         asyncio.run(main())
+    else:
+        logger.debug("Fora do período de trabalho")
+
+
+def watch():
+    """
+    Realiza uma execução do uploader a cada 60 segundos
+    """
+    while True:
+        runner()
+        time.sleep(settings.WATCH_SECONDS)
 
 
 if __name__ == "__main__":
-    runner()
+    watch()
