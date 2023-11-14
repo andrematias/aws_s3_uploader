@@ -59,8 +59,9 @@ async def consumer(queue):
                         object_name,
                         settings.S3_BUCKET,
                     )
-                storage.remove_file(file)
-                storage.purge_empty_dir(file.parent)
+                if not settings.DEBUG:
+                    storage.remove_file(file)
+                    storage.purge_empty_dir(file.parent)
     except ClientError as e:
         logger.error(e)
 

@@ -4,10 +4,15 @@ Define o tempo em que um novo processo de upload se inicia
 WATCH_SECONDS = 60 * 60  # 1h
 
 """
+Define se o script esta em modo debug, caso True os arquivos não serão removidos após o  upload
+"""
+DEBUG = False
+
+"""
 Define o horario de inicio e fim que o script pode ser executado
 """
-START_TIME = "23:50:00"
-END_TIME = "01:00:00"
+START_TIME = "09:00:00"
+END_TIME = "23:59:59"
 
 """
 True para verificar após o upload se existe o arquivo no bucket
