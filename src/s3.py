@@ -69,6 +69,9 @@ class S3:
                 return True
 
         except ClientError as e:
+            if "ExpiredToken" in str(e):
+                logger.warning("Token da sessão expirado. Por favor, gerar outro via console aws!")
+                exit()
             logger.error(e)
             return False
         logger.info("Arquivo '%s' já existe no bucket", object_name)
@@ -79,7 +82,14 @@ class S3:
         Verifica se existe um arquivo com o nome informado no s3
         :param object_name Nome do arquivo salvo no bucket
         """
-        response = self.__client.list_objects(
-            Bucket=settings.S3_BUCKET, MaxKeys=1, Prefix=object_name
-        )
-        return response.get("Contents") is not None
+        try:
+            response = self.__client.list_objects(
+                Bucket=settings.S3_BUCKET, MaxKeys=1, Prefix=object_name
+            )
+            return response.get("Contents") is not None
+        except ClientError as e:
+            if "ExpiredToken" in str(e):
+                logger.warning("Token da sessão expirado. Por favor, gerar outro via console aws!")
+                exit()
+            logger.error(e)
+            return False
