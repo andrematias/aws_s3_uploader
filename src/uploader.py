@@ -62,6 +62,7 @@ async def consumer(queue):
                 if not settings.DEBUG:
                     storage.remove_file(file)
                     storage.purge_empty_dir(file.parent)
+        logger.info("Fila vazia, aguardando novos arquivos")
     except ClientError as e:
         logger.error(e)
 
