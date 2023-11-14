@@ -1,4 +1,10 @@
 """
+Define o horario de inicio e fim que o script pode ser executado
+"""
+START_TIME = "23:50:00"
+END_TIME = "01:00:00"
+
+"""
 True para verificar após o upload se existe o arquivo no bucket
 """
 DOUBLE_CHECK_UPLOAD = False

@@ -9,6 +9,7 @@ from botocore.exceptions import ClientError
 import settings
 import storage
 from s3 import S3
+from scheduler import in_work_time
 
 logging.config.dictConfig(settings.LOGGING_CONFIG)
 logger = logging.getLogger("extensive")
@@ -73,4 +74,5 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    if in_work_time(settings.START_TIME, settings.END_TIME):
+        asyncio.run(main())
