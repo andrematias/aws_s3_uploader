@@ -73,6 +73,13 @@ async def main():
     await asyncio.gather(producer(queue), consumer(queue))
 
 
-if __name__ == "__main__":
+def runner():
+    """
+    Executa a rotina dentro do horario estabelecido
+    """
     if in_work_time(settings.START_TIME, settings.END_TIME):
         asyncio.run(main())
+
+
+if __name__ == "__main__":
+    runner()
