@@ -1,4 +1,5 @@
 import asyncio
+import itertools
 import logging
 import logging.config
 import os
@@ -18,16 +19,10 @@ async def producer(queue):
     Adiciona os arquivos na fila de processamento
     :param queue Uma fila asyncio
     """
-    files = storage.find_pattern(settings.STORAGE_ROOT, settings.FILES_PATERNS)
-    if len(files) == 0:
-        logger.info(
-            "Nenhum arquivo com o padrão '%s' encontrado no caminho '%s'",
-            settings.FILES_PATERNS,
-            settings.STORAGE_ROOT,
-        )
-        await queue.put(None)
-
-    for file in files:
+    files_generators = storage.find_pattern(
+        settings.STORAGE_ROOT, settings.FILES_PATERNS
+    )
+    for file in itertools.chain(*files_generators):
         file_stats = file.stat()
         if file_stats.st_size <= settings.MAX_FILE_SIZE:
             await queue.put(file)
