@@ -69,5 +69,7 @@ if __name__ == "__main__":
         start()
     except (SystemExit, KeyboardInterrupt):
         logger.info("Parando o serviço")
-    except:
-        traceback.print_exc()
+    except Exception as e:
+        logger.info(e)
+        if settings.DEBUG:
+            traceback.print_exc()
