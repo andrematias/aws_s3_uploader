@@ -57,7 +57,7 @@ class S3:
         """
         if object_name is None:
             object_name = os.path.basename(file_name)
-
+        object_name = object_name.replace("\\", "/")
         try:
             if not self.check_file(object_name) or force:
                 self.__client.upload_file(
