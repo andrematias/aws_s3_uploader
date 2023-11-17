@@ -31,9 +31,36 @@ async def producer(queue):
     await queue.put(None)
 
 
-async def consumer(queue):
+def upload_to_s3(s3, file):
     """
     Executa a rotina de upload das gravações para a AWS S3
+    :param s3 uma instancia de S3
+    :param file um arquivo PosixPath, WindowsPath
+    """
+    bucket_path = str(file.parent).split(os.sep)
+    bucket_path = os.sep.join(bucket_path[2:])
+    object_name = os.path.join(bucket_path, file.name)
+
+    file_stats = file.stat()
+    if file_stats.st_size <= settings.MAX_FILE_SIZE:
+        s3.upload_file(
+            file, settings.S3_BUCKET, object_name, force=settings.FORCE_UPLOAD
+        )
+
+        if settings.DOUBLE_CHECK_UPLOAD and s3.check_file(object_name):
+            logger.info(
+                "Arquivo '%s' confirmado no bucket '%s'",
+                object_name,
+                settings.S3_BUCKET,
+            )
+        if not settings.DEBUG:
+            storage.remove_file(file)
+            storage.purge_empty_dir(file.parent)
+
+
+async def consumer(queue):
+    """
+    Consome a fila criada com os arquivos encontrado no storage
     :param queue Uma fila asyncio
     """
     try:
@@ -42,26 +69,7 @@ async def consumer(queue):
             file = await queue.get()
             if file is None:
                 break
-
-            bucket_path = str(file.parent).split(os.sep)
-            bucket_path = os.sep.join(bucket_path[2:])
-            object_name = os.path.join(bucket_path, file.name)
-
-            file_stats = file.stat()
-            if file_stats.st_size <= settings.MAX_FILE_SIZE:
-                s3.upload_file(
-                    file, settings.S3_BUCKET, object_name, force=settings.FORCE_UPLOAD
-                )
-
-                if settings.DOUBLE_CHECK_UPLOAD and s3.check_file(object_name):
-                    logger.info(
-                        "Arquivo '%s' confirmado no bucket '%s'",
-                        object_name,
-                        settings.S3_BUCKET,
-                    )
-                if not settings.DEBUG:
-                    storage.remove_file(file)
-                    storage.purge_empty_dir(file.parent)
+            await asyncio.to_thread(upload_to_s3, s3, file)
         logger.info("Fila vazia, aguardando novos arquivos")
     except ClientError as e:
         logger.error(e)
@@ -73,7 +81,12 @@ async def main():
     """
     logger.info("Iniciando o processo de upload")
     queue = asyncio.Queue(settings.MAX_QUEUE_SIZE)
-    await asyncio.gather(producer(queue), consumer(queue))
+
+    consumer_tasks = [
+        asyncio.create_task(consumer(queue))
+        for task in range(1, settings.TOTAL_WORKERS)
+    ]
+    await asyncio.gather(producer(queue), *consumer_tasks)
 
 
 def runner():

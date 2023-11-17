@@ -50,6 +50,11 @@ Define o tamanho do lote que será incluso na fila de upload
 MAX_QUEUE_SIZE = 100
 
 """
+Define a quantidade de tarefas assincronas consumirá a fila
+"""
+TOTAL_WORKERS = 10
+
+"""
 Configura o logger
 """
 INFO_LOGGER_FILE = "../logs/info.log"
