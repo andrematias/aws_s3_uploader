@@ -9,6 +9,11 @@ Define se o script esta em modo debug, caso True os arquivos não serão removid
 DEBUG = False
 
 """
+Define se usará a biblioteca boto3 não oficial ou oficial
+"""
+USE_AIOBOTO = True
+
+"""
 Define o horario de inicio e fim que o script pode ser executado
 """
 START_TIME = "09:00:00"
@@ -32,7 +37,7 @@ FILES_PATERNS = "*.txt,*.mp3,*.wav"
 """
 Define o tamanho maximo do arquivo, caso maiores serão desconsiderados
 """
-MAX_FILE_SIZE = 1024 * 100
+MAX_FILE_SIZE = 1024 * 100000  # 100 Mb
 
 """
 Define se o upload acontece mesmo se já existir o arquivo
