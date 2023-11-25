@@ -25,11 +25,7 @@ async def producer(queue):
         settings.STORAGE_ROOT, settings.FILES_PATERNS
     )
     for file in itertools.chain(*files_generators):
-        file_stats = file.stat()
-
-        if file_stats.st_size <= settings.MAX_FILE_SIZE:
-            await queue.put(file)
-    await queue.put(None)
+        await queue.put(file)
 
 
 async def io_upload_to_s3(s3, file):
@@ -95,7 +91,7 @@ def upload_to_s3(s3, file):
             storage.purge_empty_dir(file.parent)
 
 
-async def consumer(queue):
+async def consumer(queue: asyncio.Queue):
     """
     Consome a fila criada com os arquivos encontrado no storage
     :param queue Uma fila asyncio
@@ -113,6 +109,7 @@ async def consumer(queue):
                 await io_upload_to_s3(s3, file)
             else:
                 await asyncio.to_thread(upload_to_s3, s3, file)
+            queue.task_done()
     except ClientError as e:
         logger.error(e)
 
@@ -125,8 +122,9 @@ async def main():
     queue = asyncio.Queue(settings.MAX_QUEUE_SIZE)
 
     consumer_tasks = [
-        asyncio.create_task(consumer(queue)) for _ in range(1, settings.TOTAL_WORKERS)
+        asyncio.create_task(consumer(queue)) for _ in range(settings.TOTAL_WORKERS)
     ]
+    await queue.join()
     await asyncio.gather(producer(queue), *consumer_tasks)
 
 
