@@ -74,7 +74,7 @@ class S3:
                 logger.warning(
                     "Token da sessão expirado. Por favor, gerar outro via console aws!"
                 )
-                exit()
+                sys.exit()
             logger.error(e)
             return False
         logger.info("Arquivo '%s' já existe no bucket", object_name)
@@ -128,7 +128,6 @@ class S3AcyncIo:
                             object_name,
                             Callback=ProgressPercentage(file),
                         )
-                        logger.info("Finished Uploading %s to s3", object_name)
                         return True
             except ClientError as e:
                 if "ExpiredToken" in str(e):
@@ -140,6 +139,7 @@ class S3AcyncIo:
             except Exception as e:
                 logger.error("Unable to s3 upload %s: %s (%s)", object_name, e, type(e))
                 sys.exit()
+            logger.info("Arquivo '%s' já existe no bucket", object_name)
             return False
 
     async def check_file(self, object_name):
@@ -152,7 +152,10 @@ class S3AcyncIo:
                 response = await s3.get_object(
                     Bucket=settings.S3_BUCKET, Key=object_name
                 )
-                return response.get("Contents") is not None
+                return (
+                    response.get("ResponseMetadata", {}).get("HTTPStatusCode", 404)
+                    == 200
+                )
         except ClientError as e:
             if "ExpiredToken" in str(e):
                 logger.warning(
