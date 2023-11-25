@@ -4,7 +4,6 @@ import logging.config
 import os
 import threading
 import time
-from pathlib import Path
 from queue import Queue
 
 from botocore.exceptions import ClientError
@@ -23,17 +22,14 @@ def producer(q: Queue):
     Adiciona os arquivos na fila de processamento
     :param queue Uma fila
     """
-    path = Path(settings.STORAGE_ROOT)
-    if path.resolve():
-        patterns = settings.FILES_PATERNS.split(",")
-        for p in patterns:
-            files = path.rglob(p)
-            for file in files:
-                file_stat = file.stat()
-                if file_stat.st_size <= settings.MAX_FILE_SIZE:
-                    q.put_nowait(file)
-                    while q.qsize() > (q.maxsize - settings.TOTAL_WORKERS):
-                        time.sleep(5)
+
+    files_generators = storage.find_pattern(
+        settings.STORAGE_ROOT, settings.FILES_PATERNS
+    )
+    for file in itertools.chain(*files_generators):
+        q.put_nowait(file)
+        while q.qsize() > (q.maxsize - settings.TOTAL_WORKERS):
+            time.sleep(5)
 
 
 def upload_to_s3(s3, file):
