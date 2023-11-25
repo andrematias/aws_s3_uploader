@@ -30,10 +30,11 @@ def find_pattern(dir_path, pattern):
     :param pattern: Padrão com o nome do arquivo
     """
     logger.info("Buscando arquivos na raiz: %s", dir_path)
-    if Path(dir_path).resolve():
+    path = Path(dir_path)
+    if path.resolve():
         patterns = pattern.split(",")
         for p in patterns:
-            yield Path(dir_path).rglob(p)
+            yield path.rglob(p)
 
 
 def remove_tree(root):
