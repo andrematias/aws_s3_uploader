@@ -98,6 +98,15 @@ def main():
         logger.debug("Fora do período de trabalho")
 
 
+def watch():
+    """
+    Realiza uma execução do uploader a cada WATCH_SECONDS
+    """
+    while True:
+        main()
+        time.sleep(settings.WATCH_SECONDS)
+
+
 if __name__ == "__main__":
     try:
         main()
