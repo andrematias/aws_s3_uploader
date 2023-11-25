@@ -10,12 +10,15 @@ import servicemanager
 import win32service
 import win32serviceutil
 
-from uploader import watch
 import settings
+
+if settings.USE_AIOBOTO:
+    from aiouploader import watch
+else:
+    from thread_uploader import watch
 
 logging.config.dictConfig(settings.LOGGING_CONFIG)
 logger = logging.getLogger("extensive")
-
 
 
 class ProcessService(win32serviceutil.ServiceFramework):
