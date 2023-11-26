@@ -29,7 +29,6 @@ def find_pattern(dir_path, pattern):
     :param dir_path: Diretorio raiz
     :param pattern: Padrão com o nome do arquivo
     """
-    logger.info("Buscando arquivos na raiz: %s", dir_path)
     path = Path(dir_path)
     if path.resolve():
         patterns = pattern.split(",")
@@ -42,8 +41,9 @@ def remove_tree(root):
     Remove a arvore de diretórios e arquivos a partir da raiz
     :param root Um diretório raiz
     """
-    logger.info("Remove a raiz: %s", root)
-    shutil.rmtree(root, ignore_errors=True)
+    if root != settings.STORAGE_ROOT:
+        logger.info("Remove a raiz: %s", root)
+        shutil.rmtree(root, ignore_errors=True)
 
 
 def purge_empty_dir(root):
@@ -54,7 +54,8 @@ def purge_empty_dir(root):
     logger.info("Apagando diretórios vazios na raiz: %s", root)
     for directory, _, _ in os.walk(root):
         with suppress(OSError):
-            os.removedirs(directory)
+            if directory != settings.STORAGE_ROOT:
+                os.removedirs(directory)
 
 
 def remove_file(filepath):
@@ -62,7 +63,8 @@ def remove_file(filepath):
     Remove o arquivo informado
     :param filename Caminho para o arquivo
     """
-    p = Path(filepath)
-    if p.resolve():
-        logger.info("Apagando o arquivo local: %s", filepath)
-        p.unlink()
+    with suppress(FileNotFoundError):
+        p = Path(filepath)
+        if p.resolve():
+            logger.info("Apagando o arquivo local: %s", filepath)
+            p.unlink()
