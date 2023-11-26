@@ -4,7 +4,6 @@ import os
 import sys
 import threading
 
-import aioboto3
 import boto3
 from botocore.exceptions import ClientError
 
@@ -106,73 +105,3 @@ class S3:
             return True
         except ExpiredTokenException:
             return False
-
-
-class S3AcyncIo:
-    """
-    Realiza os processos de upload asyncrono e relacionados ao AWS s3
-    """
-
-    def __init__(self) -> None:
-        self._session = aioboto3.Session()
-
-    async def upload_file(self, file, bucket, object_name=None, force=False):
-        """Upload a file to an S3 bucket
-
-        :param file_name: File to upload
-        :param bucket: Bucket to upload to
-        :param object_name: S3 object name. If not specified then file_name is used
-        :return: True if file was uploaded, else False
-        """
-        async with self._session.client("s3") as s3:
-            try:
-                checked_file = await self.check_file(object_name)
-                if not checked_file or force:
-                    with file.open("rb") as spfp:
-                        logger.info("Uploading %s to s3", object_name)
-                        await s3.upload_fileobj(
-                            spfp,
-                            bucket,
-                            object_name,
-                            Callback=ProgressPercentage(file),
-                        )
-                        return True
-            except ClientError as e:
-                if "ExpiredToken" in str(e):
-                    logger.warning(
-                        "Token da sessão expirado. Por favor, gerar outro via console aws!"
-                    )
-                    sys.exit()
-                logger.error(e)
-            except Exception as e:
-                logger.error("Unable to s3 upload %s: %s (%s)", object_name, e, type(e))
-                sys.exit()
-            logger.info("Arquivo '%s' já existe no bucket", object_name)
-            return False
-
-    async def check_file(self, object_name):
-        """
-        Verifica se existe um arquivo com o nome informado no s3
-        :param object_name Nome do arquivo salvo no bucket
-        """
-        try:
-            async with self._session.client("s3") as s3:
-                response = await s3.get_object(
-                    Bucket=settings.S3_BUCKET, Key=object_name
-                )
-                return (
-                    response.get("ResponseMetadata", {}).get("HTTPStatusCode", 404)
-                    == 200
-                )
-        except ClientError as e:
-            if "ExpiredToken" in str(e):
-                logger.warning(
-                    "Token da sessão expirado. Por favor, gerar outro via console aws!"
-                )
-                sys.exit()
-            return False
-        except Exception as e:
-            logger.error(
-                "Unable to check if file exists %s: %s (%s)", object_name, e, type(e)
-            )
-        return False

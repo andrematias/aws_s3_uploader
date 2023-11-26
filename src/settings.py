@@ -1,7 +1,7 @@
 """
 Define o tempo em que um novo processo de upload se inicia
 """
-WATCH_SECONDS = 60 * 60  # 1h
+WATCH_SECONDS = 10  # 1h
 
 """
 Define se o script esta em modo debug, caso True os arquivos não serão removidos após o  upload
@@ -9,14 +9,9 @@ Define se o script esta em modo debug, caso True os arquivos não serão removid
 DEBUG = False
 
 """
-Define se usará a biblioteca boto3 não oficial ou oficial
-"""
-USE_AIOBOTO = True
-
-"""
 Define o horario de inicio e fim que o script pode ser executado
 """
-START_TIME = "09:00:00"
+START_TIME = "00:00:00"
 END_TIME = "23:59:59"
 
 """

@@ -26,8 +26,8 @@ def producer(q: Queue):
     Adiciona os arquivos na fila de processamento
     :param queue Uma fila
     """
-    with suppress(FileNotFoundError):
-        while True:
+    while True:
+        with suppress(FileNotFoundError):
             files_generators = storage.find_pattern(
                 settings.STORAGE_ROOT, settings.FILES_PATERNS
             )
@@ -35,12 +35,11 @@ def producer(q: Queue):
                 q.put(file)
                 while q.qsize() > (q.maxsize - settings.TOTAL_WORKERS):
                     time.sleep(5)
-
-            logger.info(
-                "Storage vazio, aguardando %d minutos para coletar novos arquivos...",
-                settings.WATCH_SECONDS / 60,
-            )
-            time.sleep(settings.WATCH_SECONDS)
+        logger.info(
+            "Storage vazio, aguardando %d minutos para coletar novos arquivos...",
+            settings.WATCH_SECONDS / 60,
+        )
+        time.sleep(settings.WATCH_SECONDS)
 
 
 def upload_to_s3(s3, file):

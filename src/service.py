@@ -11,11 +11,7 @@ import win32service
 import win32serviceutil
 
 import settings
-
-if settings.USE_AIOBOTO:
-    from aiouploader import watch
-else:
-    from thread_uploader import main as watch
+from uploader import main
 
 logging.config.dictConfig(settings.LOGGING_CONFIG)
 logger = logging.getLogger("extensive")
@@ -42,7 +38,7 @@ class ProcessService(win32serviceutil.ServiceFramework):
             self.proc.terminate()
 
     def SvcRun(self):
-        self.proc = multiprocessing.Process(target=watch)
+        self.proc = multiprocessing.Process(target=main)
         self.proc.start()
         self.ReportServiceStatus(win32service.SERVICE_RUNNING)
         self.SvcDoRun()
@@ -62,7 +58,7 @@ def start():
         servicemanager.PrepareToHostSingle(ProcessService)
         servicemanager.StartServiceCtrlDispatcher()
     elif "--fg" in sys.argv:
-        watch()
+        main()
     else:
         win32serviceutil.HandleCommandLine(ProcessService)
 
