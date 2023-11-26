@@ -15,7 +15,7 @@ import settings
 if settings.USE_AIOBOTO:
     from aiouploader import watch
 else:
-    from thread_uploader import watch
+    from thread_uploader import main as watch
 
 logging.config.dictConfig(settings.LOGGING_CONFIG)
 logger = logging.getLogger("extensive")

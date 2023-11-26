@@ -14,6 +14,13 @@ logging.config.dictConfig(settings.LOGGING_CONFIG)
 logger = logging.getLogger("extensive")
 
 
+class ExpiredTokenException(Exception):
+    def __init__(self):
+        super().__init__(
+            "Token da sessão expirado. Por favor, gerar outro via console aws!"
+        )
+
+
 class ProgressPercentage:
     """
     Esta classe é utilizada como callback para
@@ -71,12 +78,7 @@ class S3:
 
         except ClientError as e:
             if "ExpiredToken" in str(e):
-                logger.warning(
-                    "Token da sessão expirado. Por favor, gerar outro via console aws!"
-                )
-                sys.exit()
-            logger.error(e)
-            return False
+                raise ExpiredTokenException() from e
         logger.info("Arquivo '%s' já existe no bucket", object_name)
         return False
 
@@ -92,11 +94,17 @@ class S3:
             return response.get("Contents") is not None
         except ClientError as e:
             if "ExpiredToken" in str(e):
-                logger.warning(
-                    "Token da sessão expirado. Por favor, gerar outro via console aws!"
-                )
-                sys.exit()
-            logger.error(e)
+                raise ExpiredTokenException() from e
+            return False
+
+    def token_is_valid(self):
+        """
+        Faz uma requisição simples para testar a sessão
+        """
+        try:
+            self.check_file("unkown")
+            return True
+        except ExpiredTokenException:
             return False
 
 

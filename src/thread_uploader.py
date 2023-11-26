@@ -1,12 +1,16 @@
+"""
+Módulo responsável pelo upload de arquivos para um bucket s3 AWS
+"""
+
 import itertools
 import logging
 import logging.config
 import os
+import sys
 import threading
 import time
+from contextlib import suppress
 from queue import Queue
-
-from botocore.exceptions import ClientError
 
 import settings
 import storage
@@ -22,14 +26,21 @@ def producer(q: Queue):
     Adiciona os arquivos na fila de processamento
     :param queue Uma fila
     """
+    with suppress(FileNotFoundError):
+        while True:
+            files_generators = storage.find_pattern(
+                settings.STORAGE_ROOT, settings.FILES_PATERNS
+            )
+            for file in itertools.chain(*files_generators):
+                q.put(file)
+                while q.qsize() > (q.maxsize - settings.TOTAL_WORKERS):
+                    time.sleep(5)
 
-    files_generators = storage.find_pattern(
-        settings.STORAGE_ROOT, settings.FILES_PATERNS
-    )
-    for file in itertools.chain(*files_generators):
-        q.put_nowait(file)
-        while q.qsize() > (q.maxsize - settings.TOTAL_WORKERS):
-            time.sleep(5)
+            logger.info(
+                "Storage vazio, aguardando %d minutos para coletar novos arquivos...",
+                settings.WATCH_SECONDS / 60,
+            )
+            time.sleep(settings.WATCH_SECONDS)
 
 
 def upload_to_s3(s3, file):
@@ -41,6 +52,9 @@ def upload_to_s3(s3, file):
     bucket_path = str(file.parent).split(os.sep)
     bucket_path = os.sep.join(bucket_path[2:])
     object_name = os.path.join(bucket_path, file.name)
+
+    if not file.exists():
+        return
 
     file_stats = file.stat()
     if file_stats.st_size <= settings.MAX_FILE_SIZE:
@@ -59,13 +73,12 @@ def upload_to_s3(s3, file):
             storage.purge_empty_dir(file.parent)
 
 
-def consumer(q):
+def consumer(s3, q):
     """
     Consome a fila criada com os arquivos encontrado no storage
     :param queue Uma fila asyncio
     """
     try:
-        s3 = S3()
         while True:
             file = q.get()
             if file is None:
@@ -73,7 +86,7 @@ def consumer(q):
             logger.info("Uploading: %s", file.name)
             upload_to_s3(s3, file)
             q.task_done()
-    except ClientError as e:
+    except Exception as e:
         logger.error(e)
 
 
@@ -85,26 +98,26 @@ def main():
         logger.info("Iniciando o processo de upload")
         q = Queue(settings.MAX_QUEUE_SIZE)
 
+        s3 = S3()
+        if not s3.token_is_valid():
+            logger.warning("Sessão AWS expirada")
+            sys.exit()
+
         for i in range(settings.TOTAL_WORKERS):
-            t = threading.Thread(target=consumer, name=f"Worker {i}", args=(q,))
+            t = threading.Thread(target=consumer, name=f"Worker {i}", args=(s3, q))
             t.daemon = True
             t.start()
 
-        producer(q)
+        try:
+            producer(q)
+        except (SystemExit, KeyboardInterrupt):
+            logger.info("Parando o producer")
+            sys.exit()
         q.join()
         logger.info("Storage finalizado")
 
     else:
-        logger.debug("Fora do período de trabalho")
-
-
-def watch():
-    """
-    Realiza uma execução do uploader a cada WATCH_SECONDS
-    """
-    while True:
-        main()
-        time.sleep(settings.WATCH_SECONDS)
+        logger.info("Fora do período de trabalho")
 
 
 if __name__ == "__main__":
