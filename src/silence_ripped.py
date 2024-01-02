@@ -24,10 +24,14 @@ class ExecutorException(Exception):
 def run_local_command(cmd):
     try:
         logger.debug("Executing local command: %s", cmd)
-        ret = subprocess.run(cmd, shell=True, check=False, capture_output=True)
-        if ret.stderr:
-            return ret.stderr.decode(errors="ignore")
-        return ret.stdout.decode(errors="ignore")
+        process = subprocess.Popen(
+            cmd,
+            shell=True,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+        )
+        return process.stdout.read() if process.stdout else ""
     except FileNotFoundError as fex:
         raise ExecutorException("Cancelling command execution %s" % fex)
 
@@ -47,7 +51,6 @@ def ffmpeg_command(origin, output, decibels=-30, periods=1):
             origin, stop_periods, stop_duration, stop_threshold, output
         )
         command = f"{bin_path} {ffmpeg_args}"
-        logger.debug("Executing cmd: '%s'", command)
         ffmpeg_output = run_local_command(command)
         logger.debug(
             "Remove silcence from file '%s'. Output: %s", origin, ffmpeg_output
