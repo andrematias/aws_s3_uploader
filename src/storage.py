@@ -70,8 +70,9 @@ def remove_file(filepath):
             p.unlink()
 
 
-def move_file(filepath):
+def move_file(source, dest):
+    os.makedirs(dest, exist_ok=True)
     return shutil.move(
-        filepath,
-        os.path.join(settings.FFMPEG_OUTPUT, "o_" + os.path.basename(filepath)),
+        source,
+        os.path.join(dest, "o_" + os.path.basename(source)),
     )

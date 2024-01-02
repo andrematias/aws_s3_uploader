@@ -73,11 +73,18 @@ def upload_to_s3(s3, file):
             storage.remove_file(file)
             storage.purge_empty_dir(file.parent)
     else:
-        file = storage.move_file(file)
+        dest_directory = os.path.join(
+            settings.FFMPEG_OUTPUT,
+            os.path.dirname(file).replace(settings.STORAGE_ROOT, ""),
+        )
+
+        file = storage.move_file(file, dest_directory)
         file_out = os.path.join(
-            settings.FFMPEG_OUTPUT, os.path.basename(file).replace("o_", "")
+            dest_directory, os.path.basename(file).replace("o_", "")
         )
         if remove_silence(file, file_out) and os.path.isfile(file_out):
+            logger.info("Silencio removido do arquivo %s", file_out)
+            logger.info("Fazendo novo upload de %s", file_out)
             upload_to_s3(s3, Path(file_out))
 
 
