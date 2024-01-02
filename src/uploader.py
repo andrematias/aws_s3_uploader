@@ -10,12 +10,14 @@ import sys
 import threading
 import time
 from contextlib import suppress
+from pathlib import Path
 from queue import Queue
 
 import settings
 import storage
 from s3 import S3
 from scheduler import in_work_time
+from silence_ripped import remove_silence
 
 logging.config.dictConfig(settings.LOGGING_CONFIG)
 logger = logging.getLogger("extensive")
@@ -70,6 +72,13 @@ def upload_to_s3(s3, file):
         if not settings.DEBUG:
             storage.remove_file(file)
             storage.purge_empty_dir(file.parent)
+    else:
+        file = storage.move_file(file)
+        file_out = os.path.join(
+            settings.FFMPEG_OUTPUT, os.path.basename(file).replace("o_", "")
+        )
+        if remove_silence(file, file_out) and os.path.isfile(file_out):
+            upload_to_s3(s3, Path(file_out))
 
 
 def consumer(s3, q):

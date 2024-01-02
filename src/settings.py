@@ -1,3 +1,5 @@
+import datetime
+
 """
 Define o tempo em que um novo processo de upload se inicia
 """
@@ -54,10 +56,14 @@ Define a quantidade de tarefas assincronas consumirá a fila
 """
 TOTAL_WORKERS = 10
 
+FFMPEG_BIN = "/usr/bin/ffmpeg"
+FFMPEG_OUTPUT = "../silence/"
+
 """
 Configura o logger
 """
-INFO_LOGGER_FILE = "../logs/info.log"
+today = datetime.datetime.now()
+INFO_LOGGER_FILE = f"../logs/info.{today.day}.log"
 ERROR_LOGGER_FILE = "../logs/error.log"
 LOGGING_CONFIG = {
     "version": 1,

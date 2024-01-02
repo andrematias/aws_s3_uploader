@@ -68,3 +68,10 @@ def remove_file(filepath):
         if p.resolve():
             logger.info("Apagando o arquivo local: %s", filepath)
             p.unlink()
+
+
+def move_file(filepath):
+    return shutil.move(
+        filepath,
+        os.path.join(settings.FFMPEG_OUTPUT, "o_" + os.path.basename(filepath)),
+    )
