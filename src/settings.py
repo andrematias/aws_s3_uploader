@@ -1,6 +1,19 @@
 import datetime
 
 """
+Oracle or AWS credentials
+"""
+ACCESS_KEY_ID = ""
+SECRET_ACCESS_KEY = ""
+
+"""
+Oracle compatible informations
+"""
+OCI_COMPATIBLE = False
+OCI_NAMESPACE = ""
+OCI_REGION = ""
+
+"""
 Define o tempo em que um novo processo de upload se inicia
 """
 WATCH_SECONDS = 60 * 60  # 1h

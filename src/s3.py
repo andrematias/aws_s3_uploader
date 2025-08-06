@@ -48,11 +48,21 @@ class ProgressPercentage:
 
 class S3:
     """
-    Realiza os processos de upload e relacionados ao AWS s3
+    Realiza os processos de upload e relacionados ao AWS s3 ou Oracle bucket s3
     """
 
     def __init__(self):
-        self.__client = boto3.client("s3")
+        service_name = "s3"
+        params = {
+            "aws_access_key_id": settings.ACCESS_KEY_ID,
+            "aws_secret_access_key": settings.SECRET_ACCESS_KEY,
+        }
+        if settings.OCI_COMPATIBLE:
+            oci_namespace = settings.OCI_NAMESPACE
+            oci_region = settings.OCI_REGION
+            oci_endpoint_url = f"https://{oci_namespace}.compat.objectstorage.{oci_region}.oraclecloud.com"
+            params = params.update({"endpoint_url": oci_endpoint_url})
+        self.__client = boto3.client(service_name, params)
 
     def upload_file(self, file_name, bucket, object_name=None, force=False):
         """Upload a file to an S3 bucket
