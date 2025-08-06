@@ -3,7 +3,7 @@ import datetime
 """
 Define o tempo em que um novo processo de upload se inicia
 """
-WATCH_SECONDS = 10  # 1h
+WATCH_SECONDS = 60 * 60  # 1h
 
 """
 Define se o script esta em modo debug, caso True os arquivos não serão removidos após o  upload
@@ -24,7 +24,7 @@ DOUBLE_CHECK_UPLOAD = False
 """
 Define a raiz do storage de gravações
 """
-STORAGE_ROOT = "../storage/"
+STORAGE_ROOT = "/projects/mutant/aws_s3_uploader/storage/"
 
 """
 Define as extensões para upload
@@ -57,14 +57,14 @@ Define a quantidade de tarefas assincronas consumirá a fila
 TOTAL_WORKERS = 10
 
 FFMPEG_BIN = "/usr/bin/ffmpeg"
-FFMPEG_OUTPUT = "../silence/"
+FFMPEG_OUTPUT = "./projects/mutant/aws_s3_uploader/silence/"
 
 """
 Configura o logger
 """
 today = datetime.datetime.now()
-INFO_LOGGER_FILE = f"../logs/info.{today.day}.log"
-ERROR_LOGGER_FILE = "../logs/error.log"
+INFO_LOGGER_FILE = f"/projects/mutant/aws_s3_uploader/logs/info.{today.day}.log"
+ERROR_LOGGER_FILE = "/projects/mutant/aws_s3_uploader/logs/error.log"
 LOGGING_CONFIG = {
     "version": 1,
     "handlers": {
