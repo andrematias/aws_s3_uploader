@@ -1,4 +1,4 @@
-# Script para upload de arquivos de gravações para AWS S3
+# Script para upload de arquivos de gravações para AWS S3 ou Oralce S3
 
 ## Ordem da execução
 
@@ -33,3 +33,8 @@ python service.py stop
 ### Remover:
 
 python service.py remove
+
+## Referencias
+
+- [Oracle compatible url](https://docs.oracle.com/en-us/iaas/Content/Object/Tasks/s3compatibleapi.htm)
+- [Boto3 Lib](https://boto3.amazonaws.com/v1/documentation/api/latest/index.html)
